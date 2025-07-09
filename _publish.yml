@@ -1,0 +1,4 @@
+- source: project
+  quarto-pub:
+    - id: 0ad89280-8a90-401f-8271-c3e676fe0afd
+      url: https://mitsuhir0.quarto.pub/ogu-python-pandas

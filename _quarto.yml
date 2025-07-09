@@ -6,6 +6,9 @@ book:
   title: "Python Pandas データ分析"
   author: "Mitsuhiro Okano"
   date: "2025-07-09"
+  description: "Pythonのpandasライブラリを使用したデータ分析の実践的学習"
+  site-url: "https://mitsuhir0.quarto.pub/ogu-python-pandas/"
+  repo-url: "https://github.com/mitsuhir0/ogu-python-pandas"
   chapters:
     - index.qmd
     - part: "データ分析実習"
@@ -18,7 +21,7 @@ book:
   navbar:
     right:
       - icon: github
-        href: https://github.com/
+        href: https://github.com/mitsuhir0/ogu-python-pandas
 
 format:
   html:
@@ -33,3 +36,13 @@ execute:
   freeze: auto
 
 jupyter: python3
+
+# Quarto Pub配信設定
+publish:
+  - service: quarto-pub
+    # このプロジェクトのURLになります (quarto publishコマンド実行時に設定されます)
+    # url: https://mitsuhir0.quarto.pub/ogu-python-pandas/
+  
+# SEO設定
+lang: ja
+title-block-banner: true
