@@ -1,0 +1,35 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Python Pandas データ分析"
+  author: "Mitsuhiro Okano"
+  date: "2025-07-09"
+  chapters:
+    - index.qmd
+    - part: "データ分析実習"
+      chapters:
+        - pages/keiki.qmd
+        - pages/income.qmd
+  sidebar:
+    style: "floating"
+    search: true
+  navbar:
+    right:
+      - icon: github
+        href: https://github.com/
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-depth: 2
+    code-fold: false
+    code-tools: true
+
+execute:
+  freeze: auto
+
+jupyter: python3

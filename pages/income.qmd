@@ -1,0 +1,347 @@
+# 年収と修学年数データ分析
+
+## セットアップ
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib_fontja
+```
+
+## データ読み込み
+
+```{python}
+# 年収と修学年数のデータ読み込み
+df = pd.read_csv('csv/2_income.csv')
+df.head()
+```
+
+```{python}
+# データの概要確認
+df.describe()
+```
+
+## 基本統計量
+
+**DataFrameから列を取り出す方法：**
+
+DataFrameから特定の列を取り出すには、`df['列名']`の形式を使用します。これにより、その列のデータがSeries（1次元のデータ構造）として取得できます。
+
+```{python}
+# 年収列をSeries（1次元データ）として取得
+income = df['income']
+income
+```
+
+```{python}
+# 修学年数列をSeries（1次元データ）として取得
+# yeduc = years of education（修学年数）
+yeduc = df['yeduc']
+yeduc
+```
+
+```{python}
+# 年収の基本統計量
+income.describe()
+```
+
+上記の`describe()`メソッドは、データの要約統計量を一括で表示します。さらに詳細な統計量を個別に確認してみましょう。
+
+```{python}
+# 平均値
+income.mean()
+```
+
+```{python}
+# 中央値
+income.median()
+```
+
+```{python}
+# 最頻値
+income.mode()[0]
+```
+
+`mode()`メソッドは、複数の最頻値が存在する可能性があるため、結果をSeries（配列のような形式）で返します。`[0]`を付けることで、その最初の値を取得します。データに最頻値が複数ある場合でも、一つの値として表示されます。
+
+```{python}
+# 標準偏差
+income.std()
+```
+
+```{python}
+# 最小値と最大値
+income.min(), income.max()
+```
+
+## データ可視化
+
+```{python}
+# 年収の度数分布表（0から最大値まで10区間に分割）
+pd.cut(income, bins=10).value_counts().sort_index()
+```
+
+**メソッドチェーンの解説：**
+
+上記のコードは、複数のメソッドを連鎖的に呼び出す「メソッドチェーン」という手法を使用しています。各ステップを分解して説明します：
+
+1. `pd.cut(income, bins=10)`
+   - 年収データを10個の区間に分割
+   - `bins=10`: 10個の区間を作成
+
+2. `.value_counts()`
+   - 各区間に含まれるデータの個数を計算
+   - 結果は区間ごとの度数を表示
+
+3. `.sort_index()`
+   - 区間を昇順に並び替え
+   - 最小値から最大値の順に表示
+
+```{python}
+# 各ステップを分けて実行する場合
+step1 = pd.cut(income, bins=10)
+step2 = step1.value_counts()
+step3 = step2.sort_index()
+step3
+```
+
+上記のように分けて書くことも可能ですが、メソッドチェーンを使用することで、より簡潔で読みやすいコードになります。
+
+```{python}
+# 就学年数と年収のヒストグラム
+df.hist(figsize=(10, 6))
+plt.suptitle("就学年数と年収のヒストグラム")
+plt.tight_layout()
+plt.show()
+```
+
+年収の分布は右に裾の長い分布（右偏分布）を示しています。これは一般的な所得分布の特徴で、大多数の人が中低所得層に集中し、少数の高所得者が分布の右側に位置することを表しています。平均値が中央値よりも大きいことからも、この右偏性が確認できます。
+
+
+## 散布図分析
+
+```{python}
+# データの列名を確認
+df.columns
+```
+
+```{python}
+# データの形状を確認
+df.shape
+```
+
+```{python}
+# 修学年数と年収の散布図
+plt.figure(figsize=(10, 6))
+plt.scatter(yeduc, income, alpha=0.7)
+plt.xlabel('修学年数')
+plt.ylabel('年収')
+plt.title('修学年数と年収の散布図')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+散布図は、2つの変数の関係を視覚的に表現したグラフです。この場合、修学年数が長いほど年収が高くなる傾向があるかどうかを確認できます。点の分布が右上がりの傾向を示している場合、正の相関関係があることを示しています。
+
+```{python}
+# 修学年数と年収の相関係数
+yeduc.corr(income)
+```
+
+相関係数は-1から1の間の値で、2つの変数の関係の強さを数値で表します。1に近いほど強い正の相関、-1に近いほど強い負の相関、0に近いほど相関がないことを示します。
+
+## 対数散布図
+
+```{python}
+# 年収の最小値を確認(0以下の値があると対数を取れないため)
+income.min()
+```
+
+```{python}
+# 対数変換可能なデータのみを抽出（queryメソッドを使用）
+valid_data = df.query('income > 0 and yeduc > 0')
+print(f"有効なデータ数: {len(valid_data)}/{len(df)}")
+```
+
+```{python}
+# 修学年数と年収の対数散布図
+plt.figure(figsize=(10, 6))
+plt.scatter(valid_data['yeduc'], valid_data['income'], alpha=0.7)
+plt.xlabel('修学年数 (log)')
+plt.ylabel('年収 (log)')
+plt.title('修学年数と年収の対数散布図')
+plt.xscale('log')
+plt.yscale('log')
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+**対数散布図の使用目的：**
+対数散布図は、データの幅が大きい場合や、指数関数的な関係を線形化して観察したい場合に使用されます。年収のような所得データは広範囲にわたるため、対数変換により関係性をより明確に把握できます。
+
+## 最小二乗法による回帰分析
+
+まず、回帰分析に必要なライブラリを追加でインポートします。
+
+```{python}
+import statsmodels.formula.api as smf
+import numpy as np
+```
+
+### 線形回帰分析
+
+```{python}
+# 線形回帰モデルの推定
+# income = β₀ + β₁ × yeduc + ε
+model_linear = smf.ols('income ~ yeduc', data=df).fit()
+```
+
+**線形回帰モデルの詳細解説：**
+
+上記のコードで作成した回帰モデルについて詳しく解説します。
+
+**数式の意味：**
+- **income = β₀ + β₁ × yeduc + ε**
+  - `income`：従属変数（目的変数）- 予測したい年収
+  - `β₀`：切片（intercept）- 修学年数が0の場合の予測年収
+  - `β₁`：傾き（slope）- 修学年数が1年増加したときの年収増加額
+  - `yeduc`：独立変数（説明変数）- 修学年数
+  - `ε`：誤差項 - モデルで説明できない部分
+
+**詳細なコード解説：**
+
+1. `smf.ols('income ~ yeduc', data=df)`
+   - `smf.ols()`: statsmodelsのOLS（Ordinary Least Squares：最小二乗法）関数を呼び出し
+   - `'income ~ yeduc'`: R言語スタイルの数式記法（formula notation）
+     - `income`: 従属変数（目的変数）- 予測したい変数
+     - `~`: 「〜によって説明される」という意味
+     - `yeduc`: 独立変数（説明変数）- 予測に使用する変数
+   - `data=df`: 使用するDataFrameを指定
+   - この時点では回帰モデルの設定のみで、まだ推定は実行されていない
+
+2. `.fit()`
+   - 実際に最小二乗法を実行してパラメータを推定
+   - β₀（切片）とβ₁（傾き）を計算
+   - 回帰の結果オブジェクトを返す
+
+3. `model_linear = `
+   - 推定結果を`model_linear`という変数に代入
+   - 後で結果の詳細や予測値にアクセスするため
+
+では、推定結果の詳細を確認してみましょう：
+
+```{python}
+# 推定結果の詳細表示
+model_linear.summary()
+```
+
+**線形回帰結果の解説：**
+
+- **切片（Intercept）**: 修学年数が0年の場合の予測年収
+- **yeduc の係数**: 修学年数が1年増加するごとの年収増加額
+- **R-squared**: 決定係数。修学年数が年収の変動をどの程度説明できるかを示す（0-1の値）
+- **P>|t|**: p値。係数が統計的に有意かどうかを判定（通常0.05未満で有意）
+- **95%信頼区間**: 係数の95%信頼区間
+
+### 対数線形回帰分析
+
+年収データは右偏分布を示しているため、対数変換することでより適切なモデルになる可能性があります。
+
+先ほど作成した`valid_data`を使用して片側対数モデルを推定します。
+
+```{python}
+# 片側対数回帰モデルの推定（年収のみ対数変換）
+# log(income) = β₀ + β₁ × yeduc + ε
+model_semilog = smf.ols('np.log(income) ~ yeduc', data=valid_data).fit()
+model_semilog.summary()
+```
+
+**片側対数回帰コードの詳細解説（線形回帰からの変更点）：**
+
+1. `smf.ols('np.log(income) ~ yeduc', data=valid_data)`
+   - **変更点1**: `'income ~ yeduc'` → `'np.log(income) ~ yeduc'`
+     - 従属変数（目的変数）を`income`から`np.log(income)`に変更
+     - `np.log()`: NumPyの自然対数関数を使用
+     - 事前にDataFrameに新しい列を作成する必要はない。formula内で直接`np.log(income)`と書くだけで、内部で対数変換が実行される
+     - 年収に対数変換を適用し、対数年収を従属変数とする
+   - **変更点2**: `data=df` → `data=valid_data`
+     - 使用データを全データ（`df`）から有効データ（`valid_data`）に変更
+     - `valid_data`は0以下の値を除外したデータ（対数変換には正の値が必要）
+   - **変更点3**: 独立変数（説明変数）は`yeduc`のまま変更なし
+     - 修学年数は対数変換せず、そのまま使用
+     - これが「片側対数（semi-log）」と呼ばれる理由
+
+2. `.fit()`
+   - 機能は線形回帰と同じ：最小二乗法を実行してパラメータを推定
+   - ただし、今回は`log(income) = β₀ + β₁ × yeduc + ε`のモデルを推定
+
+3. `model_semilog = `
+   - 変数名を`model_linear`から`model_semilog`に変更
+   - 線形回帰の結果と区別するため
+
+4. `model_semilog.summary()`
+   - 機能は同じだが、結果の解釈が大きく変わる
+
+**なぜ対数変換が必要か：**
+
+線形回帰では年収データの右偏分布（高所得者の存在）により、残差が正規分布に従わない可能性があります。対数変換により：
+- 右偏分布を正規分布に近づけることができる
+- 異分散性（所得が高いほど分散が大きい）を軽減できる
+- 乗法的な関係を加法的な関係に変換できる
+
+**片側対数回帰結果の解説：**
+
+- **切片（Intercept）**: 修学年数が0年の場合のlog(年収)の予測値
+- **yeduc の係数**: 修学年数が1年増加するときの年収の変化率（％変化）
+- この係数は「修学年数が1年増加すると年収が約○○%増加する」と解釈できます
+
+**両側対数モデルについて：**
+
+両側対数モデル（`log(income) ~ log(yeduc)`）は、両変数とも対数変換するモデルです。この場合、係数は「弾性値」を表し、「修学年数が1%増加すると年収が約○○%増加する」と解釈されます。両側対数モデルは以下の場合に適用されます：
+
+- 弾性値（elasticity）を求めたい場合
+- 両変数が指数的な関係にある場合
+- 経済学で価格弾性などを分析する場合
+
+しかし、教育年数は具体的な「年」という単位で解釈することが重要なため、教育経済学では片側対数モデルが標準的に使用されます。
+
+### 回帰直線の可視化
+
+```{python}
+# 片側対数回帰の可視化
+plt.figure(figsize=(10, 6))
+
+# 散布図と回帰直線
+plt.scatter(valid_data['yeduc'], np.log(valid_data['income']), alpha=0.7, label='実際のデータ')
+plt.plot(valid_data['yeduc'], model_semilog.fittedvalues, color='red', linewidth=2, label='回帰直線')
+
+# 年収変化率をタイトルに表示
+coef = model_semilog.params['yeduc']
+percentage_change = coef * 100
+
+plt.xlabel('修学年数')
+plt.ylabel('log(年収)')
+plt.title(f'修学年数と年収の関係（修学年数1年増加 → 年収{percentage_change:.1f}%増加）')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
+
+**可視化コードの詳細解説：**
+
+1. `model_semilog.params['yeduc']`
+   - 片側対数回帰モデルから修学年数（yeduc）の係数を取得
+   - この係数は年収の変化率を表す（小数点形式）
+
+2. `percentage_change = coef * 100`
+   - 係数を100倍してパーセント表示に変換
+   - 例：係数が0.08なら、8%の増加を意味
+
+3. `plt.title(f'修学年数と年収の関係（修学年数1年増加 → 年収{percentage_change:.1f}%増加）')`
+   - f-string（フォーマット文字列）を使用してタイトルに結果を動的に埋め込み
+   - `{percentage_change:.1f}`: 小数点以下1桁で表示
+   - タイトルを見るだけで回帰分析の結果が分かる
+
+**片側対数回帰の解釈：**
+係数が0.08の場合、「修学年数が1年増加すると年収が約8%増加する」と解釈できます。これは教育の経済的収益率を直接示しており、政策判断に有用な情報となります。
